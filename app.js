@@ -6,26 +6,51 @@ const supabaseClient = supabase.createClient(
   SUPABASE_KEY
 );
 
+// Page elements
 const authForm = document.getElementById("auth-form");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const signupButton = document.getElementById("signup-button");
 const authMessage = document.getElementById("auth-message");
+
 const authSection = document.getElementById("auth-section");
 const userSection = document.getElementById("user-section");
 const userEmail = document.getElementById("user-email");
 const signoutButton = document.getElementById("signout-button");
+
+// Display a login or account message
 function showAuthMessage(message, type) {
   authMessage.textContent = message;
-  authMessage.className =
-    type === "success" ? "auth-success" : "auth-error";
+
+  if (type === "success") {
+    authMessage.className = "auth-success";
+  } else {
+    authMessage.className = "auth-error";
+  }
 }
 
+// Show the correct section based on login status
+function updateAccountDisplay(session) {
+  if (session && session.user) {
+    authSection.hidden = true;
+    userSection.hidden = false;
+    userEmail.textContent = session.user.email;
+  } else {
+    authSection.hidden = false;
+    userSection.hidden = true;
+    userEmail.textContent = "";
+  }
+}
+
+// Test the Supabase connection
 async function testSupabaseConnection() {
-  const statusElement = document.getElementById("connection-status");
+  const statusElement = document.getElementById(
+    "connection-status"
+  );
 
   try {
-    const { error } = await supabaseClient.auth.getSession();
+    const { error } =
+      await supabaseClient.auth.getSession();
 
     if (error) {
       throw error;
@@ -34,13 +59,19 @@ async function testSupabaseConnection() {
     statusElement.textContent = "Database connected";
     statusElement.className = "connection-success";
   } catch (error) {
-    statusElement.textContent = "Database connection failed";
+    statusElement.textContent =
+      "Database connection failed";
+
     statusElement.className = "connection-error";
 
-    console.error("Supabase connection error:", error.message);
+    console.error(
+      "Supabase connection error:",
+      error.message
+    );
   }
 }
 
+// Sign in
 async function signInUser(email, password) {
   showAuthMessage("Signing in...", "success");
 
@@ -55,21 +86,19 @@ async function signInUser(email, password) {
     return;
   }
 
-  showAuthMessage(
-    `Signed in successfully as ${data.user.email}`,
-    "success"
-  );
-
+  updateAccountDisplay(data.session);
   passwordInput.value = "";
 }
 
+// Create an account
 async function createUser(email, password) {
   showAuthMessage("Creating account...", "success");
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email: email,
-    password: password
-  });
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
 
   if (error) {
     showAuthMessage(error.message, "error");
@@ -77,10 +106,7 @@ async function createUser(email, password) {
   }
 
   if (data.session) {
-    showAuthMessage(
-      `Account created and signed in as ${data.user.email}`,
-      "success"
-    );
+    updateAccountDisplay(data.session);
   } else {
     showAuthMessage(
       "Account created. Check your email and confirm your account before signing in.",
@@ -91,73 +117,79 @@ async function createUser(email, password) {
   passwordInput.value = "";
 }
 
-authForm.addEventListener("submit", async function(event) {
-  event.preventDefault();
+// Login form
+authForm.addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
 
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-  if (!email || !password) {
-    showAuthMessage(
-      "Enter your email address and password.",
-      "error"
-    );
-    return;
+    if (!email || !password) {
+      showAuthMessage(
+        "Enter your email address and password.",
+        "error"
+      );
+      return;
+    }
+
+    await signInUser(email, password);
   }
+);
 
-  await signInUser(email, password);
-});
+// Create Account button
+signupButton.addEventListener(
+  "click",
+  async function() {
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-signupButton.addEventListener("click", async function() {
-  const email = emailInput.value.trim();
-  const password = passwordInput.value;
+    if (!email || !password) {
+      showAuthMessage(
+        "Enter your email address and password first.",
+        "error"
+      );
+      return;
+    }
 
-  if (!email || !password) {
-    showAuthMessage(
-      "Enter your email address and password first.",
-      "error"
-    );
-    return;
+    if (password.length < 6) {
+      showAuthMessage(
+        "Your password must be at least 6 characters long.",
+        "error"
+      );
+      return;
+    }
+
+    await createUser(email, password);
   }
+);
 
-  if (password.length < 6) {
-    showAuthMessage(
-      "Your password must be at least 6 characters long.",
-      "error"
-    );
-    return;
+// Sign Out button
+signoutButton.addEventListener(
+  "click",
+  async function() {
+    signoutButton.disabled = true;
+    signoutButton.textContent = "Signing Out...";
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+    signoutButton.disabled = false;
+    signoutButton.textContent = "Sign Out";
+
+    if (error) {
+      alert(
+        `Unable to sign out: ${error.message}`
+      );
+      return;
+    }
+
+    updateAccountDisplay(null);
   }
+);
 
-  function updateAccountDisplay(session) {
-  if (session && session.user) {
-    authSection.hidden = true;
-    userSection.hidden = false;
-    userEmail.textContent = session.user.email;
-  } else {
-    authSection.hidden = false;
-    userSection.hidden = true;
-    userEmail.textContent = "";
-  }
-}
-  await createUser(email, password);
-});
-
-testSupabaseConnection();
-checkCurrentSession();
-
-signoutButton.addEventListener("click", async function() {
-  signoutButton.disabled = true;
-  signoutButton.textContent = "Signing Out...";
-
-  const { error } = await supabaseClient.auth.signOut();
-
-  signoutButton.disabled = false;
-  signoutButton.textContent = "Sign Out";
-
-  if (error) {
-    alert(`Unable to sign out: ${error.message}`);
-  }
-});
+// Check for an existing login
 async function checkCurrentSession() {
   const {
     data: { session },
@@ -165,7 +197,11 @@ async function checkCurrentSession() {
   } = await supabaseClient.auth.getSession();
 
   if (error) {
-    console.error("Unable to read session:", error.message);
+    console.error(
+      "Unable to read session:",
+      error.message
+    );
+
     updateAccountDisplay(null);
     return;
   }
@@ -173,14 +209,15 @@ async function checkCurrentSession() {
   updateAccountDisplay(session);
 }
 
-supabaseClient.auth.onAuthStateChange(function(event, session) {
-  updateAccountDisplay(session);
+// Watch for login and logout changes
+supabaseClient.auth.onAuthStateChange(
+  function(event, session) {
+    updateAccountDisplay(session);
 
-  if (event === "SIGNED_IN") {
-    console.log("User signed in.");
+    console.log("Authentication event:", event);
   }
+);
 
-  if (event === "SIGNED_OUT") {
-    console.log("User signed out.");
-  }
-});
+// Start the app
+testSupabaseConnection();
+checkCurrentSession();
