@@ -108,6 +108,69 @@
 
     </section>
 
+    <section class="quick-add-card" id="quick-add-section" hidden>
+  <h2>Quick Add Card</h2>
+
+  <p class="quick-add-description">
+    Enter a card number or card name to find a card in the master catalog.
+  </p>
+
+  <form id="quick-add-form">
+    <div class="form-group">
+      <label for="card-search">Card number or name</label>
+
+      <input
+        type="text"
+        id="card-search"
+        placeholder="Example: 001 or Luke Skywalker"
+        autocomplete="off"
+        required
+      >
+    </div>
+
+    <div class="form-group">
+      <label for="card-set">Set</label>
+
+      <select id="card-set">
+        <option value="">All sets</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="card-variant">Variant</label>
+
+      <select id="card-variant" required>
+        <option value="Normal">Normal</option>
+        <option value="Foil">Foil</option>
+        <option value="Hyperspace">Hyperspace</option>
+        <option value="Hyperspace Foil">Hyperspace Foil</option>
+        <option value="Showcase">Showcase</option>
+        <option value="Prestige">Prestige</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="card-quantity">Quantity</label>
+
+      <input
+        type="number"
+        id="card-quantity"
+        value="1"
+        min="1"
+        max="999"
+        required
+      >
+    </div>
+
+    <button type="submit" id="find-card-button">
+      Find Card
+    </button>
+  </form>
+
+  <p id="quick-add-message"></p>
+
+  <div id="card-search-results"></div>
+</section>
   </main>
 
   <footer>
