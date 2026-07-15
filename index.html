@@ -25,7 +25,46 @@
   </nav>
 
   <main>
+<section class="auth-card" id="auth-section">
+  <h2>Account Login</h2>
 
+  <p class="auth-description">
+    Sign in to access and manage your card collection.
+  </p>
+
+  <form id="auth-form">
+    <label for="email">Email address</label>
+    <input
+      type="email"
+      id="email"
+      placeholder="your@email.com"
+      autocomplete="email"
+      required
+    >
+
+    <label for="password">Password</label>
+    <input
+      type="password"
+      id="password"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+      minlength="6"
+      required
+    >
+
+    <div class="auth-buttons">
+      <button type="submit" id="login-button">
+        Sign In
+      </button>
+
+      <button type="button" id="signup-button">
+        Create Account
+      </button>
+    </div>
+  </form>
+
+  <p id="auth-message"></p>
+</section>
     <section class="welcome-card">
       <h2>Welcome to Your Collection</h2>
       <p>
