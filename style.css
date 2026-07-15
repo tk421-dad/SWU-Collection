@@ -187,6 +187,39 @@ footer {
 .auth-error {
   color: #ff7b7b;
 }
+
+.user-card {
+  background-color: #1b2330;
+  border: 1px solid #303b4d;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  padding: 24px;
+}
+
+.user-card h2 {
+  color: #f4c542;
+  margin-bottom: 12px;
+}
+
+.user-card p {
+  color: #c9ced8;
+  margin-bottom: 18px;
+}
+
+#signout-button {
+  background-color: #f4c542;
+  border: none;
+  border-radius: 6px;
+  color: #111111;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 12px 18px;
+}
+
+#signout-button:hover {
+  opacity: 0.85;
+}
 @media screen and (max-width: 800px) {
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
