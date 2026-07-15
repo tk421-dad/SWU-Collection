@@ -11,7 +11,10 @@ const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const signupButton = document.getElementById("signup-button");
 const authMessage = document.getElementById("auth-message");
-
+const authSection = document.getElementById("auth-section");
+const userSection = document.getElementById("user-section");
+const userEmail = document.getElementById("user-email");
+const signoutButton = document.getElementById("signout-button");
 function showAuthMessage(message, type) {
   authMessage.textContent = message;
   authMessage.className =
@@ -125,7 +128,59 @@ signupButton.addEventListener("click", async function() {
     return;
   }
 
+  function updateAccountDisplay(session) {
+  if (session && session.user) {
+    authSection.hidden = true;
+    userSection.hidden = false;
+    userEmail.textContent = session.user.email;
+  } else {
+    authSection.hidden = false;
+    userSection.hidden = true;
+    userEmail.textContent = "";
+  }
+}
   await createUser(email, password);
 });
 
 testSupabaseConnection();
+checkCurrentSession();
+
+signoutButton.addEventListener("click", async function() {
+  signoutButton.disabled = true;
+  signoutButton.textContent = "Signing Out...";
+
+  const { error } = await supabaseClient.auth.signOut();
+
+  signoutButton.disabled = false;
+  signoutButton.textContent = "Sign Out";
+
+  if (error) {
+    alert(`Unable to sign out: ${error.message}`);
+  }
+});
+async function checkCurrentSession() {
+  const {
+    data: { session },
+    error
+  } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error("Unable to read session:", error.message);
+    updateAccountDisplay(null);
+    return;
+  }
+
+  updateAccountDisplay(session);
+}
+
+supabaseClient.auth.onAuthStateChange(function(event, session) {
+  updateAccountDisplay(session);
+
+  if (event === "SIGNED_IN") {
+    console.log("User signed in.");
+  }
+
+  if (event === "SIGNED_OUT") {
+    console.log("User signed out.");
+  }
+});
